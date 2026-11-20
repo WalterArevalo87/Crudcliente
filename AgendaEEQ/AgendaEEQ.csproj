@@ -5,6 +5,8 @@
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>AgendaEEQ</RootNamespace>
+    <!-- Permite ejecutar con .NET 9 o 10 si no está instalado el runtime de .NET 8 -->
+    <RollForward>Major</RollForward>
   </PropertyGroup>
 
   <ItemGroup>
