@@ -1,0 +1,92 @@
+@model AgendaEEQ.Models.KpiDetalleViewModel
+@using AgendaEEQ.Models
+@{
+    ViewData["Title"] = Model.Titulo;
+    var f = Model.Filtro;
+    var filtros = new List<string>();
+    if (f.Anio.HasValue) filtros.Add($"Año {f.Anio}");
+    if (!string.IsNullOrEmpty(f.Responsable)) filtros.Add(f.Responsable);
+    if (!string.IsNullOrEmpty(f.Parroquia)) filtros.Add(f.Parroquia);
+}
+<link rel="stylesheet" href="~/css/kpi.css" asp-append-version="true" />
+
+<a asp-action="Index" asp-all-route-data="@f.RouteValues()" class="small text-decoration-none">← Volver al tablero</a>
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mt-1 mb-2">
+    <div>
+        <h3 class="mb-0">@Model.Titulo</h3>
+        <div class="text-muted small">@Model.Descripcion @(filtros.Count > 0 ? "Filtros: " + string.Join(" · ", filtros) : "")</div>
+    </div>
+    <form method="get" asp-action="Detalle" class="d-flex gap-2">
+        @foreach (var kv in f.RouteValues())
+        {
+            <input type="hidden" name="@kv.Key" value="@kv.Value" />
+        }
+        <select name="vista" class="form-select form-select-sm" onchange="this.form.submit()">
+            @foreach (var v in KpiDetalleViewModel.Vistas)
+            {
+                <option value="@v.Vista" selected="@(v.Vista == Model.Vista)">@v.Nombre</option>
+            }
+        </select>
+    </form>
+</div>
+
+<div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+    <input id="buscar" type="search" class="form-control form-control-sm" style="max-width:320px" placeholder="Buscar en la tabla…" />
+    <span class="small text-muted"><span id="contador">@Model.Filas.Count</span> de @Model.Filas.Count registros</span>
+    <button id="exportar" type="button" class="btn btn-sm btn-outline-secondary ms-auto">Exportar CSV</button>
+</div>
+<p class="small text-muted mb-2">La columna <strong>Fila</strong> es el número de fila en el Excel, para ubicar y corregir el registro.</p>
+
+<div class="table-responsive kpi-detalle">
+    <table id="tabla" class="table table-sm table-bordered table-hover align-middle">
+        <thead class="table-light sticky-top">
+            <tr>
+                @foreach (var c in Model.Columnas)
+                {
+                    <th>@c</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Filas.Count; i++)
+            {
+                <tr class="@Model.ClasesFila[i]">
+                    @foreach (var celda in Model.Filas[i])
+                    {
+                        <td class="@((celda?.Length ?? 0) > 25 ? "largo" : "")">@celda</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (Model.Filas.Count == 0)
+    {
+        <div class="alert alert-success">No hay registros en esta vista. ✔</div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        const filas = Array.from(document.querySelectorAll('#tabla tbody tr'));
+        document.getElementById('buscar').addEventListener('input', e => {
+            const q = e.target.value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+            let n = 0;
+            filas.forEach(tr => {
+                const ok = tr.textContent.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').includes(q);
+                tr.style.display = ok ? '' : 'none';
+                if (ok) n++;
+            });
+            document.getElementById('contador').textContent = n;
+        });
+        document.getElementById('exportar').addEventListener('click', () => {
+            const esc = t => '"' + t.replace(/"/g, '""') + '"';
+            const enc = Array.from(document.querySelectorAll('#tabla thead th')).map(th => esc(th.textContent.trim()));
+            const cuerpo = filas.filter(tr => tr.style.display !== 'none')
+                .map(tr => Array.from(tr.cells).map(td => esc(td.textContent.trim())).join(';'));
+            const blob = new Blob(['﻿' + [enc.join(';'), ...cuerpo].join('\r\n')], { type: 'text/csv;charset=utf-8' });
+            const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: '@(Model.Vista).csv' });
+            a.click();
+            URL.revokeObjectURL(a.href);
+        });
+    </script>
+}

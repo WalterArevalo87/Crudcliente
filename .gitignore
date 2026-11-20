@@ -1,0 +1,6 @@
+bin/
+obj/
+.vs/
+*.user
+# Agenda cargada (datos de la empresa, no versionar)
+AgendaEEQ/App_Data/

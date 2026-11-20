@@ -1,0 +1,40 @@
+@model (AgendaEEQ.Models.KpiIndicador Kpi, AgendaEEQ.Models.KpiFiltro Filtro)
+@using AgendaEEQ.Models
+@{
+    var k = Model.Kpi;
+    var (clase, texto) = k.Estado switch
+    {
+        Semaforo.Verde => ("kpi-verde", "Cumple"),
+        Semaforo.Amarillo => ("kpi-amarillo", "En alerta"),
+        Semaforo.Rojo => ("kpi-rojo", "No cumple"),
+        Semaforo.SinDatos => ("kpi-gris", "Sin datos"),
+        _ => ("kpi-info", ""),
+    };
+}
+<div class="col-12 col-sm-6 col-xl-4">
+    <div class="card kpi-card h-100 @clase">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                <h6 class="kpi-nombre mb-1">@k.Nombre</h6>
+                @if (!string.IsNullOrEmpty(texto))
+                {
+                    <span class="badge kpi-badge">@texto</span>
+                }
+            </div>
+            <div class="kpi-valor">@k.Valor</div>
+            @if (k.Meta != null)
+            {
+                <div class="small kpi-meta">Meta: @k.Meta</div>
+            }
+            <div class="small text-muted mt-1">@k.Detalle</div>
+        </div>
+        <div class="card-footer bg-transparent d-flex justify-content-between small">
+            <a tabindex="0" role="button" class="text-decoration-none text-muted" data-bs-toggle="popover"
+               data-bs-trigger="focus" data-bs-placement="top" title="¿Cómo se calcula?" data-bs-content="@k.Formula">ⓘ Cálculo</a>
+            @if (k.VistaDetalle != null)
+            {
+                <a asp-action="Detalle" asp-all-route-data="@Model.Filtro.RouteValues(k.VistaDetalle)" class="text-decoration-none">Verificar registros →</a>
+            }
+        </div>
+    </div>
+</div>
