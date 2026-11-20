@@ -33,7 +33,9 @@
             </div>
             <div class="form-group">
                 <label asp-for="EstadoCivil" class="control-label"></label>
-                <input asp-for="EstadoCivil" class="form-control" />
+                <select asp-for="EstadoCivil" class="form-control" asp-items="@(new SelectList(Cliente.Models.Listas.EstadosCiviles))">
+                    <option value="">-- Seleccione Estado Civil --</option>
+                </select>
                 <span asp-validation-for="EstadoCivil" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -43,7 +45,9 @@
             </div>
             <div class="form-group">
                 <label asp-for="Sexo" class="control-label"></label>
-                <input asp-for="Sexo" class="form-control" />
+                <select asp-for="Sexo" class="form-control" asp-items="@(new SelectList(Cliente.Models.Listas.Sexos))">
+                    <option value="">-- Seleccione Sexo --</option>
+                </select>
                 <span asp-validation-for="Sexo" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -53,7 +57,9 @@
             </div>
             <div class="form-group">
                 <label asp-for="TipoSangre" class="control-label"></label>
-                <input asp-for="TipoSangre" class="form-control" />
+                <select asp-for="TipoSangre" class="form-control" asp-items="@(new SelectList(Cliente.Models.Listas.TiposSangre))">
+                    <option value="">-- Seleccione Tipo de Sangre --</option>
+                </select>
                 <span asp-validation-for="TipoSangre" class="text-danger"></span>
             </div>
             <div class="form-group">
