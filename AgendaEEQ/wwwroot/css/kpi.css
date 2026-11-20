@@ -57,3 +57,14 @@ main > .kpi-filtros, .kpi-seccion { scroll-margin-top: 1rem; }
 .kpi-detalle table { font-size: .82rem; }
 .kpi-detalle td { white-space: nowrap; }
 .kpi-detalle td.largo { white-space: normal; min-width: 180px; max-width: 320px; overflow-wrap: anywhere; }
+
+/* Encabezado con logo de la Empresa Eléctrica Quito */
+.eeq-navbar { border-bottom: 4px solid #009cdf; box-shadow: 0 1px 4px rgba(0, 0, 0, .06); }
+.eeq-logo { height: 46px; width: auto; }
+.eeq-titulo {
+    border-left: 2px solid #d5dbe1; padding-left: .9rem; line-height: 1.15;
+    font-weight: 600; font-size: 1.05rem; color: #1d2b36;
+}
+.eeq-titulo small { display: block; font-weight: 400; font-size: .8rem; color: #6c757d; }
+.eeq-navbar .nav-link { color: #33414d; font-weight: 500; }
+.eeq-navbar .nav-link:hover { color: #009cdf; }
