@@ -1,0 +1,59 @@
+/* Módulo KPI – Agenda de Trabajo Z4 */
+main > .kpi-filtros, .kpi-seccion { scroll-margin-top: 1rem; }
+
+/* El tablero aprovecha más ancho que el layout estándar */
+@media (min-width: 1400px) {
+    body:has(.kpi-seccion) .container { max-width: 1500px; }
+}
+
+.kpi-seccion {
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-bottom: 2px solid #e3e6ea;
+    padding-bottom: .35rem;
+    margin-bottom: .9rem;
+}
+
+.kpi-card { border: 1px solid #e3e6ea; border-left-width: 6px; }
+.kpi-card .kpi-nombre { font-weight: 600; color: #495057; }
+.kpi-card .kpi-valor { font-size: 1.9rem; font-weight: 700; line-height: 1.15; }
+.kpi-card .kpi-meta { color: #6c757d; }
+.kpi-card .card-footer { border-top: 1px solid #f0f1f3; }
+
+.kpi-verde { border-left-color: #2e9e5b; }
+.kpi-verde .kpi-valor { color: #1f7a45; }
+.kpi-verde .kpi-badge { background: #d6f0e0; color: #1f7a45; }
+
+.kpi-amarillo { border-left-color: #e0a21e; }
+.kpi-amarillo .kpi-valor { color: #a36f00; }
+.kpi-amarillo .kpi-badge { background: #fbedcc; color: #8a5d00; }
+
+.kpi-rojo { border-left-color: #c94d4d; }
+.kpi-rojo .kpi-valor { color: #b03535; }
+.kpi-rojo .kpi-badge { background: #f6dada; color: #9b2c2c; }
+
+.kpi-gris { border-left-color: #adb5bd; }
+.kpi-gris .kpi-badge { background: #e9ecef; color: #6c757d; }
+
+.kpi-info { border-left-color: #2a6fb0; }
+.kpi-info .kpi-valor { color: #24476b; }
+
+.kpi-leyenda .punto {
+    display: inline-block; width: .8rem; height: .8rem; border-radius: 50%;
+    margin: 0 .25rem 0 .75rem; vertical-align: -1px; border: 0;
+}
+.kpi-leyenda .punto:first-child { margin-left: 0; }
+.kpi-leyenda .punto.kpi-verde { background: #2e9e5b; }
+.kpi-leyenda .punto.kpi-amarillo { background: #e0a21e; }
+.kpi-leyenda .punto.kpi-rojo { background: #c94d4d; }
+
+.txt-verde { color: #1f7a45; font-weight: 600; }
+.txt-amarillo { color: #a36f00; font-weight: 600; }
+.txt-rojo { color: #b03535; font-weight: 600; }
+
+.kpi-tabla td, .kpi-tabla th { white-space: nowrap; }
+
+.kpi-detalle { max-height: 70vh; overflow: auto; }
+.kpi-detalle table { font-size: .82rem; }
+.kpi-detalle td { white-space: nowrap; }
+.kpi-detalle td.largo { white-space: normal; min-width: 180px; max-width: 320px; overflow-wrap: anywhere; }

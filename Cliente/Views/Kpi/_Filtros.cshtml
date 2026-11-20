@@ -1,0 +1,37 @@
+@model Cliente.Models.Kpi.KpiDashboardViewModel
+@* Barra de filtros compartida *@
+<form method="get" asp-action="Index" class="row g-2 align-items-end mb-3 kpi-filtros">
+    <div class="col-6 col-md-2">
+        <label class="form-label small mb-0">Año</label>
+        <select name="anio" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">Todos</option>
+            @foreach (var a in Model.Anios)
+            {
+                <option value="@a" selected="@(Model.Filtro.Anio == a)">@a</option>
+            }
+        </select>
+    </div>
+    <div class="col-6 col-md-3">
+        <label class="form-label small mb-0">Responsable</label>
+        <select name="responsable" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">Todos</option>
+            @foreach (var r in Model.Responsables)
+            {
+                <option value="@r" selected="@(Model.Filtro.Responsable == r)">@r</option>
+            }
+        </select>
+    </div>
+    <div class="col-8 col-md-3">
+        <label class="form-label small mb-0">Parroquia</label>
+        <select name="parroquia" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">Todas</option>
+            @foreach (var p in Model.Parroquias)
+            {
+                <option value="@p" selected="@(Model.Filtro.Parroquia == p)">@p</option>
+            }
+        </select>
+    </div>
+    <div class="col-4 col-md-auto">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary w-100">Limpiar</a>
+    </div>
+</form>

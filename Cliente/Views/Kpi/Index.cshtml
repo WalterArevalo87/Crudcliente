@@ -1,0 +1,188 @@
+@model Cliente.Models.Kpi.KpiDashboardViewModel
+@using System.Text.Json
+@{
+    ViewData["Title"] = "KPI Agenda de Trabajo Z4";
+    string J(object o) => JsonSerializer.Serialize(o);
+    string Clase(double? v, double meta, double alerta, bool mayor) => !v.HasValue ? "" :
+        (mayor ? (v >= meta ? "txt-verde" : v >= alerta ? "txt-amarillo" : "txt-rojo")
+               : (v <= meta ? "txt-verde" : v <= alerta ? "txt-amarillo" : "txt-rojo"));
+    var f = Model.Filtro;
+    var subtitulo = new List<string>();
+    if (f.Anio.HasValue) subtitulo.Add($"Año {f.Anio}");
+    if (!string.IsNullOrEmpty(f.Responsable)) subtitulo.Add(f.Responsable);
+    if (!string.IsNullOrEmpty(f.Parroquia)) subtitulo.Add(f.Parroquia);
+}
+<link rel="stylesheet" href="~/css/kpi.css" asp-append-version="true" />
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-2">
+    <div>
+        <h2 class="mb-0">Indicadores – Agenda de Trabajo Z4</h2>
+        <div class="text-muted small">
+            @(subtitulo.Count > 0 ? string.Join(" · ", subtitulo) : "Todos los años, responsables y parroquias") ·
+            Archivo: <strong>@Model.Agenda.NombreArchivo</strong> (cargado @Model.Agenda.FechaCarga.ToString("dd/MM/yyyy HH:mm"))
+        </div>
+    </div>
+    <a asp-action="Cargar" class="btn btn-sm btn-primary">Actualizar Excel</a>
+</div>
+
+@if (TempData["Mensaje"] is string msg)
+{
+    <div class="alert alert-success py-2">@msg</div>
+}
+@foreach (var adv in Model.Agenda.Advertencias)
+{
+    <div class="alert alert-warning py-2">@adv</div>
+}
+
+<partial name="_Filtros" model="Model" />
+
+<div class="kpi-leyenda small text-muted mb-3">
+    <span class="punto kpi-verde"></span> Cumple meta
+    <span class="punto kpi-amarillo"></span> En alerta
+    <span class="punto kpi-rojo"></span> No cumple
+    <span class="ms-2">· Las metas se configuran en <code>appsettings.json</code> → <code>KpiMetas</code>.</span>
+</div>
+
+<h4 class="kpi-seccion">Atención de solicitudes</h4>
+<div class="row g-3 mb-4">
+    @foreach (var k in Model.IndicadoresSolicitudes)
+    {
+        <partial name="_Indicador" model="(k, f)" />
+    }
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6"><div class="card h-100"><div class="card-body">
+        <h6>Solicitudes ingresadas por @Model.EtiquetaPeriodo</h6>
+        <canvas id="chPeriodo" height="220"></canvas>
+    </div></div></div>
+    <div class="col-lg-6"><div class="card h-100"><div class="card-body">
+        <h6>Tiempo promedio de respuesta por @Model.EtiquetaPeriodo (días)</h6>
+        <canvas id="chTiempo" height="220"></canvas>
+    </div></div></div>
+    <div class="col-lg-6"><div class="card h-100"><div class="card-body">
+        <h6>Solicitudes por estado</h6>
+        <canvas id="chEstado" height="260"></canvas>
+    </div></div></div>
+    <div class="col-lg-6"><div class="card h-100"><div class="card-body">
+        <h6>Solicitudes por tipo de requerimiento</h6>
+        <canvas id="chTipo" height="260"></canvas>
+    </div></div></div>
+</div>
+
+<h4 class="kpi-seccion">Diseños</h4>
+<div class="row g-3 mb-4">
+    @foreach (var k in Model.IndicadoresDisenos)
+    {
+        <partial name="_Indicador" model="(k, f)" />
+    }
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-lg-4"><div class="card h-100"><div class="card-body">
+        <h6>Diseños por estado</h6>
+        <canvas id="chDisEstado" height="260"></canvas>
+    </div></div></div>
+    <div class="col-lg-4"><div class="card h-100"><div class="card-body">
+        <h6>Estado contractual</h6>
+        <canvas id="chContractual" height="260"></canvas>
+    </div></div></div>
+    <div class="col-lg-4"><div class="card h-100"><div class="card-body">
+        <h6>Presupuesto por plan de obra (USD)</h6>
+        <canvas id="chPlan" height="260"></canvas>
+    </div></div></div>
+</div>
+
+<h4 class="kpi-seccion">Inspecciones, reuniones y construcción</h4>
+<div class="row g-3 mb-4">
+    @foreach (var k in Model.IndicadoresGestion)
+    {
+        <partial name="_Indicador" model="(k, f)" />
+    }
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-lg-6"><div class="card h-100"><div class="card-body">
+        <h6>Inspecciones y reuniones por mes</h6>
+        <canvas id="chInsp" height="220"></canvas>
+    </div></div></div>
+    <div class="col-lg-6"><div class="card h-100"><div class="card-body">
+        <h6>Obras por tipo de proyecto</h6>
+        <canvas id="chObras" height="220"></canvas>
+    </div></div></div>
+</div>
+
+<h4 class="kpi-seccion">Desempeño por responsable</h4>
+<div class="table-responsive mb-4">
+    <table class="table table-sm table-hover align-middle kpi-tabla">
+        <thead class="table-light">
+            <tr>
+                <th>Responsable</th>
+                <th class="text-end">Solicitudes</th>
+                <th class="text-end">% atendidas</th>
+                <th class="text-end">Días prom. respuesta</th>
+                <th class="text-end">% en plazo (≤ @Model.Metas.PlazoRespuestaDias d)</th>
+                <th class="text-end">Diseños</th>
+                <th class="text-end">Concluidos</th>
+                <th class="text-end">Presupuesto diseños</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model.PorResponsable)
+            {
+                <tr>
+                    <td><a asp-action="Index" asp-all-route-data="@(new Cliente.Models.Kpi.KpiFiltro { Anio = f.Anio, Parroquia = f.Parroquia, Responsable = r.Responsable }.RouteValues())">@r.Responsable</a></td>
+                    <td class="text-end">@r.Solicitudes</td>
+                    <td class="text-end @Clase(r.PorcentajeAtendidas, Model.Metas.AtencionMeta, Model.Metas.AtencionAlerta, true)">@(r.PorcentajeAtendidas?.ToString("N1") ?? "—")</td>
+                    <td class="text-end @Clase(r.DiasPromedioRespuesta, Model.Metas.TiempoRespuestaMeta, Model.Metas.TiempoRespuestaAlerta, false)">@(r.DiasPromedioRespuesta?.ToString("N1") ?? "—")</td>
+                    <td class="text-end @Clase(r.PorcentajeDentroPlazo, Model.Metas.DentroPlazoMeta, Model.Metas.DentroPlazoAlerta, true)">@(r.PorcentajeDentroPlazo?.ToString("N1") ?? "—")</td>
+                    <td class="text-end">@r.Disenos</td>
+                    <td class="text-end">@r.DisenosConcluidos</td>
+                    <td class="text-end">@Cliente.Services.KpiCalculator.Dinero(r.PresupuestoDisenos)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script src="~/lib/chartjs/chart.umd.min.js"></script>
+    <script>
+        document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el => new bootstrap.Popover(el));
+
+        const azul = '#2a6fb0', verde = '#2e9e5b', naranja = '#e08a1e';
+        const paleta = ['#2a6fb0', '#2e9e5b', '#e08a1e', '#8e5cc4', '#c94d4d', '#1c9aa6', '#a3893a', '#6b7a8f', '#d1679a', '#4f8f3a', '#999'];
+        const moneda = v => '$' + Number(v).toLocaleString('es-EC', { maximumFractionDigits: 0 });
+
+        function barras(id, serie, opts = {}) {
+            const el = document.getElementById(id);
+            if (!serie.Etiquetas.length) { el.replaceWith(Object.assign(document.createElement('p'), { className: 'text-muted small', textContent: 'Sin datos para los filtros seleccionados.' })); return; }
+            new Chart(el, {
+                type: opts.tipo || 'bar',
+                data: { labels: serie.Etiquetas, datasets: [{ data: serie.Valores, backgroundColor: opts.color || azul, borderColor: opts.color || azul, tension: .3 }] },
+                options: {
+                    indexAxis: opts.horizontal ? 'y' : 'x',
+                    plugins: { legend: { display: false }, tooltip: opts.moneda ? { callbacks: { label: c => moneda(c.raw) } } : {} },
+                    scales: { [opts.horizontal ? 'x' : 'y']: { beginAtZero: true, ticks: opts.moneda ? { callback: moneda } : {} } },
+                }
+            });
+        }
+        function dona(id, serie) {
+            const el = document.getElementById(id);
+            if (!serie.Etiquetas.length) { el.replaceWith(Object.assign(document.createElement('p'), { className: 'text-muted small', textContent: 'Sin datos para los filtros seleccionados.' })); return; }
+            new Chart(el, {
+                type: 'doughnut',
+                data: { labels: serie.Etiquetas, datasets: [{ data: serie.Valores, backgroundColor: paleta }] },
+                options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
+            });
+        }
+
+        barras('chPeriodo', @Html.Raw(J(Model.SolicitudesPorPeriodo)));
+        barras('chTiempo', @Html.Raw(J(Model.TiempoRespuestaPorPeriodo)), { tipo: 'line', color: naranja });
+        barras('chEstado', @Html.Raw(J(Model.SolicitudesPorEstado)), { horizontal: true });
+        dona('chTipo', @Html.Raw(J(Model.SolicitudesPorTipo)));
+        dona('chDisEstado', @Html.Raw(J(Model.DisenosPorEstado)));
+        dona('chContractual', @Html.Raw(J(Model.DisenosPorEstadoContractual)));
+        barras('chPlan', @Html.Raw(J(Model.PresupuestoPorPlan)), { horizontal: true, moneda: true, color: verde });
+        barras('chInsp', @Html.Raw(J(Model.InspeccionesPorMes)), { color: verde });
+        barras('chObras', @Html.Raw(J(Model.ObrasPorTipo)), { horizontal: true });
+    </script>
+}

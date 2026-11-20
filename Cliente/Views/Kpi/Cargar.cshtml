@@ -1,0 +1,48 @@
+@model Cliente.Models.Kpi.AgendaData
+@{
+    ViewData["Title"] = "Cargar agenda de trabajo";
+}
+<link rel="stylesheet" href="~/css/kpi.css" asp-append-version="true" />
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <h2>Cargar agenda de trabajo</h2>
+        <p class="text-muted">
+            Suba el archivo Excel <em>AGENDA TRABAJO Z4</em>. El sistema lee las hojas
+            <strong>SOLICITUDES</strong>, <strong>DISEÑOS</strong>, <strong>CONSTRUCCIÓN</strong> e
+            <strong>INSPECCIONES Y REUNIONES</strong> y calcula los indicadores. Cada vez que actualice el Excel,
+            vuelva a subirlo aquí; el último archivo cargado queda guardado en el servidor.
+        </p>
+
+        <div asp-validation-summary="All" class="text-danger"></div>
+
+        <form asp-action="Cargar" method="post" enctype="multipart/form-data" class="card card-body mb-4">
+            <label for="archivo" class="form-label">Archivo Excel (.xlsx)</label>
+            <input type="file" id="archivo" name="archivo" accept=".xlsx,.xlsm" class="form-control mb-3" required />
+            <button type="submit" class="btn btn-primary" onclick="this.disabled=true;this.textContent='Procesando…';this.form.submit();">
+                Cargar y calcular KPI
+            </button>
+        </form>
+
+        @if (Model != null)
+        {
+            <div class="card">
+                <div class="card-header">Archivo actual</div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>@Model.NombreArchivo</strong> · cargado @Model.FechaCarga.ToString("dd/MM/yyyy HH:mm")</p>
+                    <ul class="mb-2">
+                        <li>@Model.Solicitudes.Count solicitudes</li>
+                        <li>@Model.Disenos.Count proyectos de diseño</li>
+                        <li>@Model.Obras.Count obras de construcción</li>
+                        <li>@Model.Inspecciones.Count inspecciones y reuniones</li>
+                    </ul>
+                    @foreach (var adv in Model.Advertencias)
+                    {
+                        <div class="alert alert-warning py-1 mb-1">@adv</div>
+                    }
+                    <a asp-action="Index" class="btn btn-outline-primary btn-sm">Ver tablero</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

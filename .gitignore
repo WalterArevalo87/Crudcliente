@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Agenda de trabajo cargada en el módulo KPI (datos de la empresa, no versionar)
+Cliente/App_Data/
